@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<script>
+    function countWaysToChooseDurians(L, R, m) {
+  let count = 0;
+
+  for (let i = 1; i <= R - L + 1; i++) {
+    let j = i + 1;
+    while (j <= R - L + 1 && 2 * L + i + j - 2 <= m) {
+      count += (R - L + 1 - j + 1); // 这里加上所有可能的 j
+      j++;
+    }
+  }
+
+  return count;
+}
+
+// 读取输入的数据组数
+const t = parseInt(prompt("请输入数据组数："));
+
+// 处理每组数据
+for (let k = 0; k < t; k++) {
+  // 读取每组数据
+  const input = prompt("请输入L、R、m：").split(" ").map(Number);
+  const L = input[0];
+  const R = input[1];
+  const m = input[2];
+
+  // 计算并输出结果
+  const result = countWaysToChooseDurians(L, R, m);
+  console.log(result);
+}
+
+</script>
+<body>
+    
+</body>
+</html>

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import {
-  Button, Col, Drawer, Row, Space, Tabs,
+  Button, Col, Drawer, Row, Space, Tabs, message,
 } from 'antd';
 import { EditableProTable } from '@ant-design/pro-components';
 import { ChromeOutlined, RedoOutlined } from '@ant-design/icons';
@@ -75,10 +75,39 @@ const OrderTime = ({
         editable={{
           onSave: async (rowKey, d) => {
             let newData = [];
+
+            const startTime = new Date(`1970-01-01 ${d.startTime}`);
+            const endTime = new Date(`1970-01-01 ${d.endTime}`);
+
+            if (startTime >= endTime) {
+              message.warning('结束时间必须晚于开始时间');
+              return;
+            }
             if (orderTime.findIndex((item) => item.key === rowKey) > -1) {
               newData = orderTime?.map((item) => (item.key === rowKey ? _.omit(d, 'index') : { ...item }));
             } else {
-              newData = [...orderTime, _.omit(d, 'index')];
+              const newTimeSlot = { ..._.omit(d, 'index'), key: getMaxKey(orderTime) + 1 };
+              const overlappingSlot = orderTime.find((item) => (
+                // Check for overlapping time slots
+                (startTime >= new Date(`1970-01-01 ${item.startTime}`) && startTime < new Date(`1970-01-01 ${item.endTime}`))
+                || (endTime > new Date(`1970-01-01 ${item.startTime}`) && endTime <= new Date(`1970-01-01 ${item.endTime}`))
+              ));
+
+              if (overlappingSlot) {
+                message.warning('时间段重复');
+                return;
+              }
+
+              const duplicateSlot = orderTime.find((item) => (
+                item.startTime === newTimeSlot.startTime && item.endTime === newTimeSlot.endTime
+              ));
+
+              if (duplicateSlot) {
+                message.warning('时间段重复');
+                return;
+              }
+
+              newData = [...orderTime, newTimeSlot];
             }
             onSaveHandler(newData);
           },
